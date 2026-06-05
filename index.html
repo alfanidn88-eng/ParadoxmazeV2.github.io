@@ -1,0 +1,1518 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Paradox Maze v4.0: Quantum Guardian Engine</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Plus+Jakarta+Sans:wght@300;400;600;800&family=Syne:wght@700;800&display=swap');
+
+        :root {
+            --bg-void: #030307;
+            --panel-dark: rgba(7, 7, 15, 0.92);
+            --panel-brd: rgba(139, 92, 246, 0.35);
+            --neon-purple: #a78bfa;
+            --neon-green: #4ade80;
+            --neon-red: #f87171;
+            --neon-gold: #fbbf24;
+            --neon-blue: #60a5fa;
+            --neon-pink: #f472b6;
+            --text-main: #f8fafc;
+            --text-muted: #64748b;
+            --cyber-glow: 0 0 20px rgba(139, 92, 246, 0.4);
+            
+            /* Map Themes Dynamic Tokens */
+            --theme-bg: #040408;
+            --theme-wall: #09090e;
+            --theme-wall-brd: rgba(167, 139, 250, 0.12);
+        }
+
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+            margin: 0;
+            padding: 0;
+            touch-action: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-void);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: var(--text-main);
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* Ambient Dynamic Background Grid Pattern */
+        .bg-matrix-grid {
+            position: absolute;
+            top: 0; left: 0; width: 200%; height: 200%;
+            background-image: 
+                linear-gradient(rgba(139, 92, 246, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(139, 92, 246, 0.04) 1px, transparent 1px);
+            background-size: 50px 50px;
+            transform: translate(-25%, -25%) rotate(-5deg);
+            animation: backgroundScroll 120s linear infinite;
+            z-index: 1;
+            pointer-events: none;
+        }
+
+        @keyframes backgroundScroll {
+            0% { transform: translate(-25%, -25%) rotate(-5deg); }
+            100% { transform: translate(-25%, -50%) rotate(-5deg); }
+        }
+
+        .neon-fog-aura {
+            position: absolute;
+            top: 50%; left: 50%;
+            width: 800px; height: 800px;
+            background: radial-gradient(circle, rgba(139, 92, 246, 0.08) 0%, transparent 70%);
+            transform: translate(-50%, -50%);
+            z-index: 2;
+            pointer-events: none;
+            animation: cosmicPulse 8s ease-in-out infinite alternate;
+        }
+
+        @keyframes cosmicPulse {
+            0% { opacity: 0.5; transform: translate(-50%, -50%) scale(0.9); }
+            100% { opacity: 1; transform: translate(-50%, -50%) scale(1.1); }
+        }
+
+        body::before {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.35) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 9999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        .crt-flicker {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9998;
+            pointer-events: none;
+            background: rgba(139, 92, 246, 0.002);
+            animation: crtBlurEffect 0.2s infinite;
+        }
+
+        @keyframes crtBlurEffect {
+            0% { opacity: 0.95; }
+            50% { opacity: 1; }
+            100% { opacity: 0.97; }
+        }
+
+        .screen-overlay {
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            padding: 24px;
+            background: radial-gradient(circle at center, rgba(3, 3, 7, 0.96) 0%, rgba(2, 2, 5, 0.99) 100%);
+            backdrop-filter: blur(10px);
+            opacity: 0;
+            transition: opacity 0.3s ease-in-out;
+            overflow-y: auto;
+        }
+
+        .screen-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        h1, h2, h3 {
+            font-family: 'Syne', sans-serif;
+            text-transform: uppercase;
+            letter-spacing: 4px;
+            text-align: center;
+        }
+
+        .title-glow {
+            font-size: 3.5rem;
+            color: var(--text-main);
+            text-shadow: var(--cyber-glow), 0 0 40px rgba(139, 92, 246, 0.2);
+            margin-bottom: 4px;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            letter-spacing: 6px;
+            animation: glitchText 4s infinite;
+        }
+
+        @keyframes glitchText {
+            0%, 95%, 100% { text-shadow: var(--cyber-glow); transform: skew(0); }
+            96% { text-shadow: 3px -2px #ef4444, -3px 2px #3b82f6; transform: skew(-2deg); }
+            98% { text-shadow: -2px 3px #ef4444, 2px -3px #3b82f6; transform: skew(3deg); }
+        }
+
+        .subtitle {
+            font-size: 0.8rem;
+            color: var(--neon-green);
+            font-family: monospace;
+            letter-spacing: 6px;
+            margin-bottom: 30px;
+            text-transform: uppercase;
+        }
+
+        .btn {
+            background: rgba(139, 92, 246, 0.08);
+            border: 1px solid var(--neon-purple);
+            color: var(--text-main);
+            padding: 14px 28px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.25, 1, 0.5, 1);
+            margin: 6px 0;
+            width: 300px;
+            text-align: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(4px);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0; left: -100%; width: 100%; height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
+            transition: all 0.4s ease;
+        }
+
+        .btn:hover::before { left: 100%; }
+
+        .btn:hover {
+            background: var(--neon-purple);
+            color: #030307;
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.6);
+            transform: translateY(-2px);
+            border-color: #fff;
+        }
+
+        .panel-container {
+            background: var(--panel-dark);
+            border: 1px solid var(--panel-brd);
+            border-radius: 12px;
+            padding: 24px;
+            width: 100%;
+            max-width: 920px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.8);
+            backdrop-filter: blur(16px);
+            z-index: 10;
+        }
+
+        /* Tabs and Filter Configs */
+        .shop-filter-tabs {
+            display: flex;
+            gap: 6px;
+            margin-top: 14px;
+            width: 100%;
+            overflow-x: auto;
+            padding-bottom: 6px;
+        }
+
+        .tab-btn {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.08);
+            color: #94a3b8;
+            padding: 8px 16px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            text-transform: uppercase;
+            font-weight: bold;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            border-color: var(--neon-purple);
+            color: #fff;
+            background: rgba(139, 92, 246, 0.2);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+        }
+
+        .shop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(145px, 145px));
+            gap: 12px;
+            justify-content: center;
+            max-height: 300px;
+            overflow-y: auto;
+            padding: 12px;
+            margin: 14px 0;
+            border: 1px solid rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.5);
+            border-radius: 8px;
+        }
+
+        .shop-item {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 10px 6px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .shop-item:hover {
+            background: rgba(255,255,255,0.06);
+            transform: translateY(-3px);
+            box-shadow: 0 8px 16px rgba(0,0,0,0.5);
+        }
+
+        .shop-item.equipped {
+            border-color: var(--neon-green) !important;
+            background: rgba(34, 197, 94, 0.08);
+            box-shadow: 0 0 15px rgba(34, 197, 94, 0.25);
+        }
+
+        .shop-item.unlocked { border-color: var(--neon-blue); }
+
+        .shop-item-canvas {
+            width: 52px;
+            height: 64px;
+            image-rendering: pixelated;
+            margin-bottom: 6px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 4px;
+        }
+
+        .shop-item-name {
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-align: center;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            color: #f1f5f9;
+        }
+
+        .shop-item-cost {
+            font-size: 0.7rem;
+            font-family: 'Orbitron', monospace;
+            color: var(--neon-gold);
+            margin-top: 4px;
+        }
+
+        .rarity-tag {
+            font-size: 0.5rem;
+            padding: 2px 6px;
+            border-radius: 3px;
+            font-weight: 900;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            color: #fff;
+        }
+
+        /* Map Selection Component Styles */
+        .map-select-flex {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .map-card {
+            border: 2px solid rgba(255,255,255,0.08);
+            border-radius: 8px;
+            padding: 16px;
+            width: 140px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: rgba(0,0,0,0.3);
+        }
+
+        .map-card:hover {
+            transform: scale(1.05);
+            border-color: var(--neon-purple);
+        }
+
+        .map-card.selected {
+            border-color: var(--neon-green);
+            background: rgba(74, 222, 128, 0.05);
+            box-shadow: 0 0 15px rgba(74, 222, 128, 0.2);
+        }
+
+        /* Quest List Elements */
+        .quest-box {
+            background: rgba(255,255,255,0.02);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 6px;
+            padding: 12px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        /* HUD Frame styling */
+        #game-hud {
+            position: absolute;
+            top: 0; left: 0; width: 100%;
+            padding: 16px 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 50;
+            pointer-events: none;
+            background: linear-gradient(to bottom, rgba(3,3,7,0.95) 0%, rgba(3,3,7,0) 100%);
+        }
+
+        .hud-element {
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            background: rgba(7, 7, 15, 0.85);
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            backdrop-filter: blur(6px);
+        }
+
+        #sanity-bar-container {
+            width: 140px;
+            height: 10px;
+            background: rgba(255,255,255,0.05);
+            border-radius: 3px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        #sanity-bar-fill {
+            height: 100%;
+            width: 100%;
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+            box-shadow: 0 0 8px rgba(239, 68, 68, 0.5);
+            transition: width 0.1s linear;
+        }
+
+        #canvas-wrapper {
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            z-index: 5; position: relative;
+        }
+
+        canvas#main-game-canvas {
+            background-color: var(--theme-bg);
+            max-width: 100%; max-height: 100%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            box-shadow: 0 0 50px rgba(0,0,0,0.95);
+            border-radius: 8px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* Identity Edit Controls */
+        .name-edit-container {
+            display: flex;
+            gap: 8px;
+            margin: 10px 0;
+            justify-content: center;
+        }
+
+        .custom-input {
+            background: rgba(0,0,0,0.5);
+            border: 1px solid var(--panel-brd);
+            padding: 10px 14px;
+            border-radius: 6px;
+            color: #fff;
+            font-family: inherit;
+            font-size: 0.85rem;
+            outline: none;
+            width: 200px;
+        }
+
+        .custom-input:focus {
+            border-color: var(--neon-purple);
+            box-shadow: 0 0 10px rgba(139, 92, 246, 0.2);
+        }
+
+        #joystick-zone {
+            position: absolute; bottom: 40px; left: 40px;
+            width: 130px; height: 130px;
+            background: rgba(255,255,255,0.01);
+            border: 2px dashed rgba(139, 92, 246, 0.15);
+            border-radius: 50%; z-index: 90;
+            display: none; align-items: center; justify-content: center;
+        }
+
+        #joystick-handle {
+            width: 50px; height: 50px;
+            background: radial-gradient(circle, var(--neon-purple) 0%, rgba(139,92,246,0.3) 100%);
+            border: 1px solid rgba(255,255,255,0.6);
+            border-radius: 50%; position: absolute;
+        }
+
+        .lang-toggle {
+            position: absolute; top: 16px; right: 16px;
+            background: rgba(7, 7, 15, 0.8);
+            border: 1px solid var(--panel-brd);
+            color: #64748b; padding: 6px 12px; border-radius: 6px;
+            cursor: pointer; font-size: 0.7rem; z-index: 500;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .lang-toggle span.active { color: var(--neon-green); text-shadow: 0 0 8px var(--neon-green); }
+
+        .info-row {
+            margin-bottom: 12px; font-size: 0.85rem;
+            display: flex; justify-content: space-between; align-items: center;
+            border-bottom: 1px dashed rgba(255,255,255,0.06); padding-bottom: 8px;
+        }
+
+        .skin-desc-panel {
+            background: rgba(0,0,0,0.6); border: 1px solid rgba(139, 92, 246, 0.15);
+            padding: 12px; border-radius: 8px; font-size: 0.8rem;
+            color: #94a3b8; margin-top: 6px; min-height: 52px;
+            text-align: center; display: flex; align-items: center; justify-content: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="bg-matrix-grid"></div>
+    <div class="neon-fog-aura"></div>
+    <div class="crt-flicker"></div>
+
+    <div class="lang-toggle" id="lang-node-toggle">
+        <span id="lang-en">EN</span> | <span id="lang-id">ID</span>
+    </div>
+
+    <div id="game-hud" style="display: none;">
+        <div class="hud-element">
+            <span id="hud-label-identity">SUBJECT:</span>
+            <span id="hud-value-name" style="color:var(--neon-green); font-weight:800;">PLAYER</span>
+        </div>
+        <div class="hud-element">
+            <span id="hud-label-spell">SPELL:</span>
+            <span id="hud-value-spell" style="color:var(--neon-blue); font-weight:700; text-transform:uppercase;">NONE</span>
+        </div>
+        <div class="hud-element">
+            <span id="hud-label-sanity">SANITY:</span>
+            <div id="sanity-bar-container">
+                <div id="sanity-bar-fill"></div>
+            </div>
+        </div>
+        <div class="hud-element">
+            <span id="hud-label-currency">CHIPS:</span>
+            <span id="hud-value-coins" style="color:var(--neon-gold); font-weight:bold;">0</span>
+        </div>
+    </div>
+
+    <div id="screen-lobby" class="screen-overlay active">
+        <h1 class="title-glow">PARADOX MAZE</h1>
+        <p class="subtitle" id="lobby-tagline">Quantum Guardian Engine</p>
+        
+        <div class="name-edit-container">
+            <input type="text" id="player-name-input" class="custom-input" maxlength="14" placeholder="Enter Identity...">
+            <button class="btn" id="btn-save-name" style="width:auto; margin:0; padding:10px 20px;">UPDATE</button>
+        </div>
+
+        <button class="btn" id="btn-lobby-prestart">INITIATE MATRIX</button>
+        <button class="btn" id="btn-lobby-shop">REGISTRY CATALOGS</button>
+        <button class="btn" id="btn-lobby-config">SYSTEM SCHEMATICS</button>
+    </div>
+
+    <div id="screen-prestart" class="screen-overlay">
+        <div class="panel-container" style="max-width:650px;">
+            <h2 id="prestart-title-header">MANIFESTATION CONFIG</h2>
+            <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">Choose structural map environment parameters</p>
+            
+            <div class="map-select-flex">
+                <div class="map-card selected" data-map="forest">
+                    <div style="width:100%; height:45px; background:#1b3f22; border-radius:4px; margin-bottom:8px;"></div>
+                    <strong style="font-size:0.85rem;" id="map-name-forest">FOREST</strong>
+                </div>
+                <div class="map-card" data-map="desert">
+                    <div style="width:100%; height:45px; background:#c29d63; border-radius:4px; margin-bottom:8px;"></div>
+                    <strong style="font-size:0.85rem;" id="map-name-desert">DESERT</strong>
+                </div>
+                <div class="map-card" data-map="snow">
+                    <div style="width:100%; height:45px; background:#8faec4; border-radius:4px; margin-bottom:8px;"></div>
+                    <strong style="font-size:0.85rem;" id="map-name-snow">SNOW</strong>
+                </div>
+            </div>
+
+            <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,0.08); padding-top:14px;">
+                <h3 style="font-size:1rem; text-align:left; margin-bottom:10px; color:var(--neon-gold);" id="daily-section-title">DAILY LOGISTICS</h3>
+                <button class="btn" id="btn-claim-daily" style="width:100%; margin:4px 0; border-color:var(--neon-gold);">CLAIM DAILY BONUS</button>
+                <div id="daily-quest-list"></div>
+            </div>
+
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="btn" id="btn-prestart-back" style="flex:1;">RETURN</button>
+                <button class="btn" id="btn-prestart-launch" style="flex:1; border-color:var(--neon-green); background:rgba(74,222,128,0.04);">LAUNCH</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-shop" class="screen-overlay">
+        <div class="panel-container">
+            <h2 id="shop-title-header">REGISTRY CATALOGS</h2>
+            <div style="display:flex; justify-content:space-between; margin-top:10px; font-size:0.85rem;">
+                <div><span id="shop-label-balance">NET VALUE:</span> <span id="shop-balance-value" style="color:var(--neon-gold); font-weight:bold;">0</span></div>
+                <div style="font-size:0.75rem; color:var(--text-muted); letter-spacing:1px;">QUANTUM SECURED LOGISTICS SHOP</div>
+            </div>
+            
+            <div class="shop-filter-tabs" id="shop-tab-container">
+                <button class="tab-btn active" data-filter="all">ALL SKINS</button>
+                <button class="tab-btn" data-filter="0">COMMON</button>
+                <button class="tab-btn" data-filter="3">LEGENDARY</button>
+                <button class="tab-btn" data-filter="5">COSMIC</button>
+                <button class="tab-btn" data-filter="6">COSMIC+</button>
+                <button class="tab-btn" data-filter="7">AETHEL</button>
+                <button class="tab-btn" data-filter="8">GODLY</button>
+                <button class="tab-btn" data-filter="spells" style="border-color:var(--neon-blue);" id="tab-filter-spells">SPELLSHOP</button>
+            </div>
+
+            <div class="shop-grid" id="shop-items-grid-container"></div>
+            <div class="skin-desc-panel" id="skin-details-description">Select catalog sequence.</div>
+            
+            <div style="text-align: center; margin-top: 12px;">
+                <button class="btn" id="btn-shop-back" style="width:100%">RETURN TO CORE LOBBY</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="screen-config" class="screen-overlay">
+        <div class="panel-container" style="max-width: 500px;">
+            <h2 id="config-title-header">SYSTEM CONFIG</h2>
+            <p style="text-align:center; font-size:0.8rem; color:var(--text-muted); margin-bottom:24px;">Adjust system audio frequencies</p>
+            <div class="info-row" style="padding: 10px 0;">
+                <span id="config-label-music">AMBIENT BACKGROUND MUSIC</span>
+                <input type="checkbox" id="cfg-check-music" checked style="accent-color:var(--neon-purple); transform: scale(1.3); cursor:pointer;">
+            </div>
+            <div class="info-row" style="padding: 10px 0; margin-bottom: 24px;">
+                <span id="config-label-sfx">OPERATIONAL SFX FEEDBACK</span>
+                <input type="checkbox" id="cfg-check-sfx" checked style="accent-color:var(--neon-purple); transform: scale(1.3); cursor:pointer;">
+            </div>
+            <button class="btn" id="btn-config-reset" style="width:100%; border-color:var(--neon-red); background:rgba(239,68,68,0.02); font-size:0.8rem; margin-bottom:10px;">RESET ALL PROGRESS DATA</button>
+            <button class="btn" id="btn-config-back" style="width:100%">SAVE & RETURN</button>
+        </div>
+    </div>
+
+    <div id="screen-gameover" class="screen-overlay" style="background: radial-gradient(circle, #1c0505 0%, #020205 100%);">
+        <h1 class="title-glow" style="color:var(--neon-red); text-shadow:0 0 25px var(--neon-red);" id="go-title">MANIFESTATION FAILED</h1>
+        <p class="subtitle" id="go-subtitle" style="color:var(--text-muted);">Your sanity dissolved completely into the loop matrix</p>
+        <button class="btn" id="btn-go-retry" style="border-color:var(--neon-red);">RE-ENTER PARADOX</button>
+        <button class="btn" id="btn-go-menu">ABANDON TO LOBBY</button>
+    </div>
+
+    <div id="screen-victory" class="screen-overlay" style="background: radial-gradient(circle, #051e0f 0%, #020205 100%);">
+        <h1 class="title-glow" style="color:var(--neon-green); text-shadow:0 0 25px var(--neon-green);" id="vic-title">CORE REACHED</h1>
+        <p class="subtitle" id="vic-subtitle" style="color:var(--neon-gold);">The absolute reality loop breaks... temporarily</p>
+        <button class="btn" id="btn-vic-continue" style="border-color:var(--neon-green);">PROCEED TO NEXT CYCLE</button>
+    </div>
+
+    <div id="canvas-wrapper">
+        <canvas id="main-game-canvas" width="640" height="480"></canvas>
+    </div>
+
+    <div id="joystick-zone">
+        <div id="joystick-handle"></div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // ============================================================================
+        // 1. GUARDIAN SYSTEM (ANTI-CHEAT & DEV ACCESS VERIFICATION ENGINE)
+        // ============================================================================
+        (function GuardianSystemEngine() {
+            const SECRET_OWNER_TOKEN = "DEV_MASTER_AKSES_2026";
+            if (localStorage.getItem("admin_secure_token") === SECRET_OWNER_TOKEN) {
+                console.log("Guardian System status: Owner verification complete. Systems active.");
+                return;
+            }
+
+            // Block common inspect events
+            document.addEventListener('contextmenu', e => e.preventDefault());
+            document.addEventListener('keydown', e => {
+                if (e.keyCode === 123 || 
+                    (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || 
+                    (e.ctrlKey && e.keyCode === 85)) {
+                    e.preventDefault();
+                    return false;
+                }
+            });
+
+            // Fast evaluation infinite protection loop
+            setInterval(() => {
+                function selfEvaluateDebugger(val) {
+                    if (("" + val / val).length !== 1 || val % 20 === 0) {
+                        (function() {}.constructor("debugger")());
+                    } else {
+                        (function() {}.constructor("debugger")());
+                    }
+                    selfEvaluateDebugger(++val);
+                }
+                try { selfEvaluateDebugger(0); } catch(err){}
+            }, 600);
+
+            // Guard structural integrity against DOM hacking injections
+            const DOMGuardObserver = new MutationObserver((mutations) => {
+                mutations.forEach((m) => {
+                    if (m.type === 'childList' || m.type === 'attributes') {
+                        document.body.innerHTML = "<h1 style='color:#ef4444; text-align:center; margin-top:20%; font-family:sans-serif;'>GUARDIAN SYSTEM: ILLEGAL CODE MANIPULATION DETECTED. SYSTEM TERMINATED.</h1>";
+                        window.location.reload();
+                    }
+                });
+            });
+            DOMGuardObserver.observe(document.documentElement, { attributes: true, childList: true, subtree: true });
+        })();
+
+        // ============================================================================
+        // 2. DICTIONARY LOCALIZATION SYSTEM DATA
+        // ============================================================================
+        const LocalizationEngine = {
+            en: {
+                tagline: "Quantum Guardian Engine",
+                start: "INITIATE MATRIX",
+                shop: "REGISTRY CATALOGS",
+                config: "SYSTEM SCHEMATICS",
+                shopTitle: "REGISTRY CATALOGS",
+                balance: "NET VALUE:",
+                returnLobby: "RETURN TO CORE LOBBY",
+                sysConfig: "SYSTEM CONFIG",
+                configSub: "Adjust system audio frequencies",
+                bgMusic: "AMBIENT BACKGROUND MUSIC",
+                opSfx: "OPERATIONAL SFX FEEDBACK",
+                resetProg: "RESET ALL PROGRESS DATA",
+                saveReturn: "SAVE & RETURN",
+                failedTitle: "MANIFESTATION FAILED",
+                failedSub: "Your sanity dissolved completely into the loop matrix",
+                reenter: "RE-ENTER PARADOX",
+                abandon: "ABANDON TO LOBBY",
+                coreReached: "CORE REACHED",
+                loopBreaks: "The absolute reality loop breaks... temporarily",
+                proceedNext: "PROCEED TO NEXT CYCLE"
+            },
+            id: {
+                tagline: "Mesin Pelindung Quantum",
+                start: "INISIASI MATRIKS",
+                shop: "KATALOG REGISTRI",
+                config: "SKEMATIK SISTEM",
+                shopTitle: "KATALOG REGISTRI",
+                balance: "SALDO BERSIH:",
+                returnLobby: "KEMBALI KE LOBBY UTAMA",
+                sysConfig: "KONFIGURASI SISTEM",
+                configSub: "Sesuaikan frekuensi audio sistem",
+                bgMusic: "MUSIK LATAR BELAKANG AMBIENT",
+                opSfx: "FEEDBACK SFX OPERASIONAL",
+                resetProg: "RESET SEMUA DATA PROGRESS",
+                saveReturn: "SIMPAN & KEMBALI",
+                failedTitle: "MANIFESTASI GAGAL",
+                failedSub: "Sanitas Anda larut sepenuhnya ke dalam matriks loop",
+                reenter: "MASUK ULANG PARADOKS",
+                abandon: "TINGGALKAN KE LOBBY",
+                coreReached: "INTI DIJANGKAU",
+                loopBreaks: "Loop realitas absolut terputus... untuk sementara",
+                proceedNext: "LANJUT KE SIKLUS BERIKUTNYA"
+            }
+        };
+
+        const GaslightingQuotes = {
+            en: [
+                "You are trapped in your own delusion, [NAME].",
+                "Did you really believe there was an escape, [NAME]?",
+                "The core is just another loop layer, [NAME]."
+            ],
+            id: [
+                "Kamu terjebak dalam delusimu sendiri, [NAME].",
+                "Apakah kamu benar-benar percaya ada jalan keluar, [NAME]?",
+                "Inti itu hanyalah lapisan loop lainnya, [NAME]."
+            ]
+        };
+
+        // ============================================================================
+        // 3. GLOBAL ENGINE STATE MACHINE DATA TRACKER
+        // ============================================================================
+        const ParadoxEngine = {
+            scene: 'Lobby',
+            lang: 'id',
+            music: true,
+            sfx: true,
+            player: {
+                name: 'AL FAN',
+                coins: 25000,
+                unlockedSkins: ['common1'],
+                equippedSkin: 'common1',
+                activeSpell: null,
+                lastDailyClaimDate: null,
+                completedQuestTracker: []
+            },
+            selectedMapTheme: 'forest'
+        };
+
+        // ============================================================================
+        // 4. MAP ENVIRONMENT THEME SPECS CONFIGURATION
+        // ============================================================================
+        const MapThemesDatabase = {
+            forest: { bg: "#041408", wall: "#0d2b14", wallBrd: "rgba(74, 222, 128, 0.25)" },
+            desert: { bg: "#1f160a", wall: "#423119", wallBrd: "rgba(251, 191, 36, 0.25)" },
+            snow: { bg: "#08131f", wall: "#1b2d42", wallBrd: "rgba(96, 165, 250, 0.25)" }
+        };
+
+        // ============================================================================
+        // 5. OPERATIONAL PROCEDURAL AUDIO SYNTHESIZER
+        // ============================================================================
+        const SoundEngine = {
+            ctx: null, droneOsc: null, droneGain: null,
+            init() {
+                if (this.ctx) return;
+                try {
+                    this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                    this.startAmbientDrone();
+                } catch (e) {}
+            },
+            startAmbientDrone() {
+                if (!this.ctx || !ParadoxEngine.music || this.droneOsc) return;
+                try {
+                    this.droneOsc = this.ctx.createOscillator();
+                    this.droneGain = this.ctx.createGain();
+                    this.droneOsc.type = 'sawtooth';
+                    this.droneOsc.frequency.setValueAtTime(45, this.ctx.currentTime);
+                    let flt = this.ctx.createBiquadFilter();
+                    flt.type = 'lowpass';
+                    flt.frequency.setValueAtTime(110, this.ctx.currentTime);
+                    this.droneGain.gain.setValueAtTime(0.06, this.ctx.currentTime);
+                    this.droneOsc.connect(flt);
+                    flt.connect(this.droneGain);
+                    this.droneGain.connect(this.ctx.destination);
+                    this.droneOsc.start();
+                } catch(e) {}
+            },
+            stopAmbientDrone() {
+                try {
+                    if (this.droneOsc) { this.droneOsc.stop(); this.droneOsc.disconnect(); this.droneOsc = null; }
+                    if (this.droneGain) { this.droneGain.disconnect(); this.droneGain = null; }
+                } catch(e){}
+            },
+            playClick() {
+                if (!ParadoxEngine.sfx || !this.ctx) return;
+                try {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'sine'; osc.frequency.setValueAtTime(440, this.ctx.currentTime);
+                    g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.05);
+                    osc.connect(g); g.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.05);
+                } catch(e){}
+            },
+            playBump() {
+                if (!ParadoxEngine.sfx || !this.ctx) return;
+                try {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'square'; osc.frequency.setValueAtTime(100, this.ctx.currentTime);
+                    g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.15);
+                    osc.connect(g); g.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.15);
+                } catch(e){}
+            },
+            playSpellActivation() {
+                if (!ParadoxEngine.sfx || !this.ctx) return;
+                try {
+                    let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                    osc.type = 'triangle'; osc.frequency.setValueAtTime(220, this.ctx.currentTime);
+                    osc.frequency.linearRampToValueAtTime(880, this.ctx.currentTime + 0.3);
+                    g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                    g.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+                    osc.connect(g); g.connect(this.ctx.destination); osc.start(); osc.stop(this.ctx.currentTime + 0.3);
+                } catch(e){}
+            },
+            playVictory() {
+                if (!ParadoxEngine.sfx || !this.ctx) return;
+                try {
+                    let now = this.ctx.currentTime;
+                    [523.25, 659.25, 783.99, 1046.50].forEach((f, i) => {
+                        let osc = this.ctx.createOscillator(); let g = this.ctx.createGain();
+                        osc.type = 'sine'; osc.frequency.setValueAtTime(f, now + i * 0.08);
+                        g.gain.setValueAtTime(0.1, now + i * 0.08);
+                        g.gain.exponentialRampToValueAtTime(0.001, now + i * 0.08 + 0.3);
+                        osc.connect(g); g.connect(this.ctx.destination); osc.start(now + i * 0.08); osc.stop(now + i * 0.08 + 0.3);
+                    });
+                } catch(e){}
+            }
+        };
+
+        // ============================================================================
+        // 6. SPELLS REGISTRY DATABASE (FULLY FUNCTIONAL INTERACTIVE MECHANICS)
+        // ============================================================================
+        const SpellRegistryDatabase = [
+            { id: 'spell_heal', name: 'Sanity Injection', cost: 800, desc_en: 'Instantly fully restores 45 sanity units when hit.', desc_id: 'Seketika memulihkan 45 unit sanitas saat digunakan.' },
+            { id: 'spell_freeze', name: 'Temporal Anchor', cost: 1500, desc_en: 'Freezes shadow clones tracking systems for 6 seconds.', desc_id: 'Membekukan pergerakan klon bayangan selama 6 detik.' },
+            { id: 'spell_shield', name: 'Quantum Aegis', cost: 2500, desc_en: 'Completely blocks the next 2 wall bump impacts.', desc_id: 'Memblokir dampak benturan dinding untuk 2 tabrakan berikutnya.' }
+        ];
+
+        // ============================================================================
+        // 7. EXTENDED ADVANCED VISUAL MASTER SKIN REGISTRY DATABASE (TIER COSMIC+)
+        // ============================================================================
+        const SkinRegistryDatabase = [
+            { id: 'common1', name: 'Forest Whisperer', rarity: 0, rarityName: 'Common', cost: 0, color: '#4ade80', desc_en: 'Standard green structural data compression line matrix.', desc_id: 'Matriks kompresi data struktural hijau standar.' },
+            { id: 'legendary1', name: 'Cyber Shogun', rarity: 3, rarityName: 'Legendary', cost: 3000, color: '#fbbf24', desc_en: 'Gold military computing layout with sleek particle tracking.', desc_id: 'Tata letak komputasi militer emas dengan pelacakan partikel.' },
+            { id: 'cosmic1', name: 'Supernova Sovereign', rarity: 5, rarityName: 'Cosmic', cost: 8000, color: '#f43f5e', desc_en: 'Active stellar nuclei tracking system. Shifts colors.', desc_id: 'Sistem pelacakan inti bintang aktif. Bergeser warna.' },
+            
+            // --- NEW HIGH TIERS ADDED VIA MEGA-UPDATE 4.0 ---
+            { id: 'cosmic_plus1', name: 'Nebula Lord', rarity: 6, rarityName: 'Cosmic+', cost: 14000, color: '#a855f7', desc_en: 'Emits rolling internal cosmic HSL fields and continuous space emissions.', desc_id: 'Memancarkan medan rona HSL kosmik internal dan emisi ruang kontinu.' },
+            { id: 'aethel1', name: 'Eternity Void', rarity: 7, rarityName: 'Aethel', cost: 22000, color: '#ec4899', desc_en: 'Absolute deep space gravity core. Distorts pixel matrices via dotted aura tags.', desc_id: 'Inti gravitasi ruang dalam absolut. Mendistorsi matriks piksel via aura bintik.' },
+            { id: 'godly1', name: 'Chronos Prime', rarity: 8, rarityName: 'Godly', cost: 45000, color: '#38bdf8', desc_en: 'The absolute apex machine. Pure divine golden frequency spectrum shifting.', desc_id: 'Mesin puncak absolut. Pergeseran spektrum frekuensi emas ilahi murni.' }
+        ];
+
+        // ============================================================================
+        // 8. HUMAN-PHANTOM 12x15 SPRITE MATRIX RENDER BLOCKS
+        // ============================================================================
+        const MasterSpriteMatrix = [
+            [0,0,0,0,1,1,1,1,0,0,0,0],
+            [0,0,1,1,2,2,2,2,1,1,0,0],
+            [0,1,2,2,2,2,2,2,2,2,1,0],
+            [1,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,3,3,2,2,2,2,3,3,2,1],
+            [1,2,3,3,2,2,2,2,3,3,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,2,1,1,1,1,1,1,2,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,1],
+            [1,2,2,2,2,2,2,2,2,2,2,1],
+            [0,1,2,2,2,2,2,2,2,2,1,0],
+            [0,1,2,2,2,2,2,2,2,2,1,0],
+            [1,2,2,1,2,2,1,2,2,1,2,1],
+            [1,1,1,0,1,1,0,1,1,0,1,1]
+        ];
+
+        function renderMatrixSprite(tgtCtx, skinId, tx, ty, rw, rh, isFacingLeft) {
+            try {
+                const skin = SkinRegistryDatabase.find(s => s.id === skinId) || SkinRegistryDatabase[0];
+                const pw = rw / 12; const ph = rh / 15;
+                const now = Date.now();
+
+                tgtCtx.save();
+                if (skin.rarity >= 5) {
+                    tgtCtx.shadowBlur = skin.rarity * 3;
+                    tgtCtx.shadowColor = skin.color;
+                }
+
+                for (let r = 0; r < 15; r++) {
+                    for (let c = 0; c < 12; c++) {
+                        let evalCol = isFacingLeft ? (11 - c) : c;
+                        let val = MasterSpriteMatrix[r][evalCol];
+                        if (val === 0) continue;
+
+                        let pxX = tx + (c * pw);
+                        let pxY = ty + (r * ph);
+
+                        if (val === 1) tgtCtx.fillStyle = '#010204';
+                        else if (val === 3) tgtCtx.fillStyle = '#ff4444';
+                        else if (val === 2) {
+                            tgtCtx.fillStyle = skin.color;
+                            
+                            // High-End Ultra Luxurious Dynamic Shaders Based On Tiering Rules
+                            if (skin.rarity === 6) { // Cosmic+
+                                let h = (now / 10 + c * 10) % 360;
+                                tgtCtx.fillStyle = `hsl(${h}, 90%, 60%)`;
+                            } else if (skin.rarity === 7) { // Aethel
+                                let f = (Math.sin(now / 100 + r) + 1) / 2;
+                                tgtCtx.fillStyle = f > 0.5 ? '#ffffff' : '#ec4899';
+                            } else if (skin.rarity === 8) { // Godly
+                                let h = (now / 5 + c * 5 + r * 5) % 40 + 45; // Golden core shimmering cycle
+                                tgtCtx.fillStyle = `hsl(${h}, 95%, 55%)`;
+                            }
+                        }
+                        tgtCtx.fillRect(Math.floor(pxX), Math.floor(pxY), Math.ceil(pw), Math.ceil(ph));
+                    }
+                }
+                tgtCtx.restore();
+            } catch(e){}
+        }
+
+        // ============================================================================
+        // 9. HIGH PERFORMANCE DYNAMIC MEMORY BALANCED PARTICLE MANAGER POOL
+        // ============================================================================
+        class AdvancedParticleSystemEngine {
+            constructor(cap = 1000) {
+                this.capacity = cap; this.pool = new Array(cap); this.head = 0;
+                for (let i = 0; i < cap; i++) {
+                    this.pool[i] = { active: false, x: 0, y: 0, vx: 0, vy: 0, color: '#fff', life: 0, mLife: 1, sz: 2 };
+                }
+            }
+            emit(x, y, vx, vy, color, life, sz) {
+                let p = this.pool[this.head];
+                p.active = true; p.x = x; p.y = y; p.vx = vx; p.vy = vy; p.color = color; p.life = life; p.mLife = life; p.sz = sz;
+                this.head = (this.head + 1) % this.capacity;
+            }
+            update(dt) {
+                for(let i=0; i<this.capacity; i++) {
+                    let p = this.pool[i]; if (!p.active) continue;
+                    p.life -= dt; if (p.life <= 0) { p.active = false; continue; }
+                    p.x += p.vx * dt; p.y += p.vy * dt;
+                }
+            }
+            draw(ctx) {
+                ctx.save();
+                for(let i=0; i<this.capacity; i++) {
+                    let p = this.pool[i]; if (!p.active) continue;
+                    ctx.globalAlpha = Math.max(0, p.life / p.mLife);
+                    ctx.fillStyle = p.color;
+                    ctx.fillRect(p.x - p.sz/2, p.y - p.sz/2, p.sz, p.sz);
+                }
+                ctx.restore();
+            }
+        }
+        const GlobalParticleSystem = new AdvancedParticleSystemEngine(1000);
+
+        // ============================================================================
+        // 10. REALISTIC DAILY QUEST LOGISTICS MACHINE (NON-VISUAL PLACEHOLDERS)
+        // ============================================================================
+        const DailyQuestEngine = {
+            quests: [
+                { id: 'q_desert', desc_en: 'Manifest victory inside the harsh desert layouts.', desc_id: 'Raih kemenangan di dalam layout peta gurun.', targetType: 'desert', reward: 1500 },
+                { id: 'q_snow', desc_en: 'Navigate across frozen matrix paths successfully.', desc_id: 'Navigasi jalur matriks bersalju dengan sukses.', targetType: 'snow', reward: 2000 }
+            ],
+            renderQuestRows() {
+                const c = document.getElementById('daily-quest-list'); if(!c) return;
+                c.innerHTML = '';
+                this.quests.forEach(q => {
+                    const activeStateStr = ParadoxEngine.player.completedQuestTracker.includes(q.id) ? 'COMPLETED' : 'ACTIVE';
+                    const div = document.createElement('div');
+                    div.className = 'quest-box';
+                    div.innerHTML = `
+                        <div>
+                            <div style="font-size:0.8rem; font-weight:700;">${ParadoxEngine.lang==='id'?q.desc_id:q.desc_en}</div>
+                            <div style="font-size:0.7rem; color:var(--neon-gold);">REWARD: +${q.reward} CHIPS</div>
+                        </div>
+                        <span style="font-size:0.7rem; font-weight:900; color:${activeStateStr==='COMPLETED'?'var(--neon-green)':'var(--text-muted)'}">${activeStateStr}</span>
+                    `;
+                    c.appendChild(div);
+                });
+            },
+            evaluateQuestCompletionTrigger(mapTypePlayed) {
+                this.quests.forEach(q => {
+                    if (q.targetType === mapTypePlayed && !ParadoxEngine.player.completedQuestTracker.includes(q.id)) {
+                        ParadoxEngine.player.completedQuestTracker.push(q.id);
+                        ParadoxEngine.player.coins += q.reward;
+                        PersistenceLocalStorageController.writeProgress();
+                    }
+                });
+                this.renderQuestRows();
+            }
+        };
+
+        // ============================================================================
+        // 11. PERSISTENCE STORAGE MANAGEMENT
+        // ============================================================================
+        const PersistenceLocalStorageController = {
+            key: "paradox_maze_v4_stable_production",
+            writeProgress() {
+                try {
+                    localStorage.setItem(this.key, JSON.stringify({
+                        lang: ParadoxEngine.lang, music: ParadoxEngine.music, sfx: ParadoxEngine.sfx, player: ParadoxEngine.player
+                    }));
+                } catch(e){}
+            },
+            loadProgress() {
+                try {
+                    let raw = localStorage.getItem(this.key); if (!raw) return;
+                    let obj = JSON.parse(raw);
+                    if (obj.lang) ParadoxEngine.lang = obj.lang;
+                    if (obj.music !== undefined) ParadoxEngine.music = obj.music;
+                    if (obj.sfx !== undefined) ParadoxEngine.sfx = obj.sfx;
+                    if (obj.player) Object.assign(ParadoxEngine.player, obj.player);
+                } catch(e){}
+            }
+        };
+
+        // ============================================================================
+        // 12. DYNAMIC REGISTRY CATALOG BUILDER LAYERS
+        // ============================================================================
+        const ShopUserInterface = {
+            activeFilter: 'all',
+            renderGrid() {
+                const c = document.getElementById('shop-items-grid-container'); if (!c) return;
+                c.innerHTML = '';
+                document.getElementById('shop-balance-value').innerText = ParadoxEngine.player.coins + " CHIPS 🪙";
+
+                if (this.activeFilter === 'spells') {
+                    // Render Functional Mechanical Spells Catalog Sub-menu
+                    SpellRegistryDatabase.forEach(sp => {
+                        let isOwned = ParadoxEngine.player.activeSpell === sp.id;
+                        let item = document.createElement('div');
+                        item.className = `shop-item ${isOwned?'equipped':''}`;
+                        item.innerHTML = `
+                            <span class="rarity-tag" style="background:var(--neon-blue)">SPELL MODULE</span>
+                            <div style="width:40px; height:40px; background:rgba(96,165,250,0.2); border-radius:50%; margin-bottom:12px;"></div>
+                            <div class="shop-item-name">${sp.name}</div>
+                            <div class="shop-item-cost">${isOwned?'EQUIPPED':sp.cost+' 🪙'}</div>
+                        `;
+                        item.addEventListener('click', () => {
+                            SoundEngine.playClick();
+                            if(ParadoxEngine.player.activeSpell === sp.id) return;
+                            if(ParadoxEngine.player.coins >= sp.cost) {
+                                ParadoxEngine.player.coins -= sp.cost;
+                                ParadoxEngine.player.activeSpell = sp.id;
+                                document.getElementById('skin-details-description').innerText = ParadoxEngine.lang==='id'?`Berhasil memuat Modul Spell: ${sp.name}`:`Successfully initialized Spell module: ${sp.name}`;
+                                PersistenceLocalStorageController.writeProgress();
+                                this.renderGrid();
+                            } else {
+                                document.getElementById('skin-details-description').innerText = "Insufficient balance keys.";
+                            }
+                        });
+                        c.appendChild(item);
+                    });
+                    return;
+                }
+
+                // Render Visual Skins System Core Loop
+                SkinRegistryDatabase.filter(s => this.activeFilter==='all' || s.rarity.toString()===this.activeFilter).forEach(sk => {
+                    let isUnlocked = ParadoxEngine.player.unlockedSkins.includes(sk.id);
+                    let isEquipped = ParadoxEngine.player.equippedSkin === sk.id;
+                    let card = document.createElement('div');
+                    card.className = `shop-item ${isEquipped?'equipped':(isUnlocked?'unlocked':'')}`;
+                    card.innerHTML = `
+                        <span class="rarity-tag" style="background:${sk.color}">${sk.rarityName}</span>
+                        <canvas class="shop-item-canvas" id="prev-${sk.id}" width="48" height="60"></canvas>
+                        <div class="shop-item-name">${sk.name}</div>
+                        <div class="shop-item-cost">${isEquipped?'ACTIVE':(isUnlocked?'EQUIP':sk.cost+' 🪙')}</div>
+                    `;
+                    card.addEventListener('click', () => {
+                        SoundEngine.playClick();
+                        if(isEquipped) return;
+                        if(isUnlocked) {
+                            ParadoxEngine.player.equippedSkin = sk.id;
+                            PersistenceLocalStorageController.writeProgress(); this.renderGrid();
+                        } else if(ParadoxEngine.player.coins >= sk.cost) {
+                            ParadoxEngine.player.coins -= sk.cost;
+                            ParadoxEngine.player.unlockedSkins.push(sk.id);
+                            ParadoxEngine.player.equippedSkin = sk.id;
+                            PersistenceLocalStorageController.writeProgress(); this.renderGrid();
+                        }
+                    });
+                    c.appendChild(card);
+                    setTimeout(() => {
+                        let canvas = document.getElementById(`prev-${sk.id}`);
+                        if(canvas) renderMatrixSprite(canvas.getContext('2d'), sk.id, 0, 0, 48, 60, false);
+                    }, 5);
+                });
+            }
+        };
+
+        // ============================================================================
+        // 13. GAMEPLAY INTERNAL MECHANICAL MATRICES
+        // ============================================================================
+        const GameCoreEnvironment = {
+            canvas: null, ctx: null, isRunning: false, frameId: null, lastTime: 0,
+            tileSize: 40, shieldCharges: 0, isCloneFrozen: false, freezeTimer: 0,
+            gridMap: [
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1],
+                [1,0,0,0,1,0,0,0,0,0,1,0,0,0,0,1],
+                [1,0,1,0,1,0,1,1,1,0,1,0,1,1,0,1],
+                [1,0,1,0,0,0,0,0,1,0,0,0,1,0,0,1],
+                [1,0,1,1,1,1,1,0,1,1,1,1,1,0,1,1],
+                [1,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1],
+                [1,1,1,1,0,0,1,1,1,1,1,0,1,1,0,1],
+                [1,0,0,1,0,0,0,0,0,0,1,0,1,0,0,1],
+                [1,0,0,1,1,1,1,1,0,0,1,0,1,1,1,1],
+                [1,0,0,0,0,0,0,1,0,0,1,0,0,0,0,1],
+                [1,1,1,0,1,1,0,0,0,0,1,1,1,1,0,1],
+                [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]
+            ],
+            player: { gridX:1, gridY:1, renderX:40, renderY:40, targetX:40, targetY:40, facing:'right', sanity:100 },
+            target: { gridX:14, gridY:10, pulse:0 },
+            clone: { active:false, renderX:-100, renderY:-100 },
+            ghost: { active:false, renderX:-100, renderY:-100, msg:"", life:0 },
+            history: [], ticks: 0, shake: 0,
+
+            init() { this.canvas = document.getElementById('main-game-canvas'); this.ctx = this.canvas.getContext('2d'); },
+            
+            startSession() {
+                // Initialize active functional spell charges configurations mapping
+                this.shieldCharges = 0; this.isCloneFrozen = false; this.freezeTimer = 0;
+                if (ParadoxEngine.player.activeSpell === 'spell_shield') this.shieldCharges = 2;
+
+                this.player.gridX = 1; this.player.gridY = 1; this.player.renderX = 40; this.player.renderY = 40;
+                this.player.targetX = 40; this.player.targetY = 40; this.player.sanity = 100;
+                this.clone.active = false; this.ghost.active = false; this.history = []; this.ticks = 0; this.shake = 0;
+
+                // Configure Dynamic Thematic Color Tokens onto the canvas layout context instantly
+                const theme = MapThemesDatabase[ParadoxEngine.selectedMapTheme];
+                document.documentElement.style.setProperty('--theme-bg', theme.bg);
+                document.documentElement.style.setProperty('--theme-wall', theme.wall);
+                document.documentElement.style.setProperty('--theme-wall-brd', theme.wallBrd);
+
+                document.getElementById('game-hud').style.display = 'flex';
+                this.updateHud();
+
+                this.isRunning = true; this.lastTime = performance.now();
+                if (this.frameId) cancelAnimationFrame(this.frameId);
+                this.frameId = requestAnimationFrame((ts) => this.loop(ts));
+            },
+            
+            stopSession() { this.isRunning = false; if(this.frameId) cancelAnimationFrame(this.frameId); document.getElementById('game-hud').style.display='none'; },
+            
+            updateHud() {
+                document.getElementById('hud-value-name').innerText = ParadoxEngine.player.name;
+                document.getElementById('hud-value-coins').innerText = ParadoxEngine.player.coins;
+                
+                // Active Spells Tracking System
+                let spName = "NONE";
+                if(ParadoxEngine.player.activeSpell) {
+                    let activeRef = SpellRegistryDatabase.find(s=>s.id === ParadoxEngine.player.activeSpell);
+                    if(activeRef) spName = activeRef.name + (this.shieldCharges>0?` (${this.shieldCharges})` : '');
+                }
+                document.getElementById('hud-value-spell').innerText = spName;
+                document.getElementById('sanity-bar-fill').style.width = `${this.player.sanity}%`;
+            },
+
+            executeMove(dx, dy) {
+                if(!this.isRunning || this.player.renderX !== this.player.targetX || this.player.renderY !== this.player.targetY) return;
+                
+                let gx = this.player.gridX + dx; let gy = this.player.gridY + dy;
+                this.player.facing = dx < 0 ? 'left' : (dx > 0 ? 'right' : this.player.facing);
+
+                if(this.gridMap[gy][gx] !== 1) {
+                    this.player.gridX = gx; this.player.gridY = gy;
+                    this.player.targetX = gx * this.tileSize; this.player.targetY = gy * this.tileSize;
+                } else {
+                    SoundEngine.playBumpsOrShieldAlerts();
+                    if (this.shieldCharges > 0) {
+                        this.shieldCharges--;
+                    } else {
+                        this.player.sanity = Math.max(0, this.player.sanity - 4);
+                        this.shake = Math.min(8, this.shake + 3);
+                    }
+                    this.triggerGhostManifest(); this.updateHud(); this.checkConstraints();
+                }
+            },
+
+            // Spell Manual Trigger Context Mapping Activation
+            triggerActiveSpellExecution() {
+                if (!this.isRunning || !ParadoxEngine.player.activeSpell) return;
+                
+                if (ParadoxEngine.player.activeSpell === 'spell_heal') {
+                    SoundEngine.playSpellActivation();
+                    this.player.sanity = Math.min(100, this.player.sanity + 45);
+                    ParadoxEngine.player.activeSpell = null; // Single Use Consumable Token rules
+                    this.updateHud();
+                } else if (ParadoxEngine.player.activeSpell === 'spell_freeze') {
+                    SoundEngine.playSpellActivation();
+                    this.isCloneFrozen = true;
+                    this.freezeTimer = 6.0;
+                    ParadoxEngine.player.activeSpell = null;
+                    this.updateHud();
+                }
+            },
+
+            triggerGhostManifest() {
+                let checkCoords = [{x:0,y:1},{x:0,y:-1},{x:1,y:0},{x:-1,y:0}];
+                for (let o of checkCoords) {
+                    let gx = this.player.gridX + o.x; let gy = this.player.gridY + o.y;
+                    if(this.gridMap[gy][gx] === 0) {
+                        this.ghost.active = true; this.ghost.renderX = gx * this.tileSize; this.ghost.renderY = gy * this.tileSize;
+                        this.ghost.life = 2.0;
+                        let q = GaslightingQuotes[ParadoxEngine.lang];
+                        this.ghost.msg = q[Math.floor(Math.random()*q.length)].replace("[NAME]", ParadoxEngine.player.name);
+                        break;
+                    }
+                }
+            },
+
+            checkConstraints() {
+                if(this.player.sanity <= 0) {
+                    this.stopSession(); SoundEngine.playBump(); SceneOverlayManager.transitionToScene('GameOver');
+                }
+            },
+
+            loop(highResTimestamp) {
+                if (!this.isRunning) return;
+                let dt = (highResTimestamp - this.lastTime) / 1000; if(dt > 0.1) dt = 0.1; this.lastTime = highResTimestamp;
+                this.ticks++;
+
+                if (this.isCloneFrozen) {
+                    this.freezeTimer -= dt;
+                    if(this.freezeTimer <= 0) this.isCloneFrozen = false;
+                }
+
+                // Interpolations
+                this.player.renderX += (this.player.targetX - this.player.renderX) * 15.0 * dt;
+                this.player.renderY += (this.player.targetY - this.player.renderY) * 15.0 * dt;
+
+                if (this.ticks % 3 === 0) {
+                    this.history.push({ x: this.player.renderX, y: this.player.renderY });
+                    if (this.history.length > 200) this.history.shift();
+                }
+
+                if (this.history.length > 50) {
+                    this.clone.active = true;
+                    if (!this.isCloneFrozen) {
+                        let hFrame = this.history[this.history.length - 50];
+                        this.clone.renderX = hFrame.x; this.clone.renderY = hFrame.y;
+                    }
+                }
+
+                if (this.clone.active && !this.isCloneFrozen) {
+                    if (Math.hypot(this.player.renderX - this.clone.renderX, this.player.renderY - this.clone.renderY) < 20) {
+                        this.player.sanity = Math.max(0, this.player.sanity - (25 * dt));
+                        this.shake = 3; this.updateHud(); this.checkConstraints();
+                    }
+                }
+
+                if (this.ghost.active) {
+                    this.ghost.life -= dt; if(this.ghost.life <= 0) this.ghost.active = false;
+                }
+
+                this.player.sanity = Math.max(0, this.player.sanity - (1.5 * dt));
+                if (this.ticks % 20 === 0) this.updateHud();
+
+                if (this.player.gridX === this.target.gridX && this.player.gridY === this.target.gridY) {
+                    this.stopSession();
+                    ParadoxEngine.player.coins += 2000;
+                    DailyQuestEngine.evaluateQuestCompletionTrigger(ParadoxEngine.selectedMapTheme);
+                    PersistenceLocalStorageController.writeProgress();
+                    SceneOverlayManager.transitionToScene('Victory');
+                    return;
+                }
+
+                GlobalParticleSystem.update(dt);
+                this.target.pulse += dt * 3;
+                if(this.shake > 0) this.shake -= dt * 10;
+
+                // Render Canvas Layers
+                this.ctx.clearRect(0,0,this.canvas.width,this.canvas.height);
+                this.ctx.save();
+                if(this.shake > 0) this.ctx.translate((Math.random()-0.5)*this.shake, (Math.random()-0.5)*this.shake);
+
+                // Render Background Custom Thematic Blocks Mapping Panels
+                const clrWall = getComputedStyle(document.documentElement).getPropertyValue('--theme-wall').trim();
+                const clrBrd = getComputedStyle(document.documentElement).getPropertyValue('--theme-wall-brd').trim();
+                
+                for(let r=0; r<12; r++) {
+                    for(let c=0; c<16; c++) {
+                        if(this.gridMap[r][c] === 1) {
+                            this.ctx.fillStyle = clrWall; this.ctx.fillRect(c*this.tileSize, r*this.tileSize, this.tileSize, this.tileSize);
+                            this.ctx.strokeStyle = clrBrd; this.ctx.strokeRect(c*this.tileSize+2, r*this.tileSize+2, this.tileSize-4, this.tileSize-4);
+                        }
+                    }
+                }
+
+                // Render Destination Target Matrix Nodes
+                let tCx = (this.target.gridX * this.tileSize) + 20; let tCy = (this.target.gridY * this.tileSize) + 20;
+                this.ctx.save(); this.ctx.translate(tCx, tCy); this.ctx.rotate(this.target.pulse/2);
+                this.ctx.strokeStyle = 'var(--neon-gold)'; this.ctx.lineWidth = 2;
+                this.ctx.strokeRect(-10, -10, 20, 20); this.ctx.restore();
+
+                GlobalParticleSystem.draw(this.ctx);
+
+                if(this.clone.active) {
+                    this.ctx.save(); this.ctx.globalAlpha = this.isCloneFrozen ? 0.2 : 0.45;
+                    renderMatrixSprite(this.ctx, 'cosmic1', this.clone.renderX+4, this.clone.renderY+2, 32, 36, false);
+                    this.ctx.restore();
+                }
+
+                if(this.ghost.active) {
+                    this.ctx.save(); this.ctx.globalAlpha = 0.3;
+                    renderMatrixSprite(this.ctx, 'godly1', this.ghost.renderX+4, this.ghost.renderY+2, 32, 36, false);
+                    this.ctx.restore();
+                    this.ctx.fillStyle = 'var(--neon-red)'; this.ctx.font = "bold 9px monospace";
+                    this.ctx.textAlign = 'center'; this.ctx.fillText(this.ghost.msg, this.ghost.renderX+20, this.ghost.renderY-5);
+                }
+
+                renderMatrixSprite(this.ctx, ParadoxEngine.player.equippedSkin, this.player.renderX+4, this.player.renderY+2, 32, 36, this.player.facing==='left');
+                this.ctx.restore();
+
+                this.frameId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+        };
+
+        SoundEngine.playBumpsOrShieldAlerts = function() {
+            if (GameCoreEnvironment.shieldCharges > 0) SoundEngine.playSpellActivation();
+            else SoundEngine.playBump();
+        };
+
+        // ============================================================================
+        // 14. SCENE VISUAL CONFIG MANAGER NAVIGATION ENGINE LAYERS
+        // ============================================================================
+        const SceneOverlayManager = {
+            transitionToScene(tgt) {
+                ParadoxEngine.scene = tgt;
+                ['screen-lobby', 'screen-prestart', 'screen-shop', 'screen-config', 'screen-gameover', 'screen-victory'].forEach(s => {
+                    document.getElementById(s).classList.remove('active');
+                });
+
+                if(tgt === 'Lobby') document.getElementById('screen-lobby').classList.add('active');
+                else if(tgt === 'PreStart') {
+                    document.getElementById('screen-prestart').classList.add('active');
+                    DailyQuestEngine.renderQuestRows();
+                } else if(tgt === 'Shop') {
+                    document.getElementById('screen-shop').classList.add('active'); ShopUserInterface.renderGrid();
+                } else if(tgt === 'Config') document.getElementById('screen-config').classList.add('active');
+                else if(tgt === 'GameOver') document.getElementById('screen-gameover').classList.add('active');
+                else if(tgt === 'Victory') document.getElementById('screen-victory').classList.add('active');
+                else if(tgt === 'Gameplay') GameCoreEnvironment.startSession();
+            },
+            applyLocalization() {
+                const p = LocalizationEngine[ParadoxEngine.lang];
+                document.getElementById('lobby-tagline').innerText = p.tagline;
+                document.getElementById('btn-lobby-prestart').innerText = p.start;
+                document.getElementById('btn-lobby-shop').innerText = p.shop;
+                document.getElementById('btn-lobby-config').innerText = p.config;
+                document.getElementById('shop-title-header').innerText = p.shopTitle;
+                document.getElementById('shop-label-balance').innerText = p.balance;
+                document.getElementById('btn-shop-back').innerText = p.returnLobby;
+                document.getElementById('config-title-header').innerText = p.sysConfig;
+                document.getElementById('config-label-music').innerText = p.bgMusic;
+                document.getElementById('config-label-sfx').innerText = p.opSfx;
+                document.getElementById('btn-config-reset').innerText = p.resetProg;
+                document.getElementById('btn-config-back').innerText = p.saveReturn;
+                document.getElementById('go-title').innerText = p.failedTitle;
+                document.getElementById('go-subtitle').innerText = p.failedSub;
+                document.getElementById('btn-go-retry').innerText = p.reenter;
+                document.getElementById('btn-go-menu').innerText = p.abandon;
+                document.getElementById('vic-title').innerText = p.coreReached;
+                document.getElementById('vic-subtitle').innerText = p.loopBreaks;
+                document.getElementById('btn-vic-continue').innerText = p.proceedNext;
+
+                document.getElementById('lang-en').className = ParadoxEngine.lang==='en'?'active':'';
+                document.getElementById('lang-id').className = ParadoxEngine.lang==='id'?'active':'';
+            }
+        };
+
+        // ============================================================================
+        // 15. SYSTEM ARCHITECTURE EVENTS INTERFACES ATTACHMENTS
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            PersistenceLocalStorageController.loadProgress();
+            GameCoreEnvironment.init(); SceneOverlayManager.applyLocalization();
+
+            document.getElementById('player-name-input').value = ParadoxEngine.player.name;
+            document.getElementById('cfg-check-music').checked = ParadoxEngine.music;
+            document.getElementById('cfg-check-sfx').checked = ParadoxEngine.sfx;
+
+            document.getElementById('lang-node-toggle').addEventListener('click', () => {
+                ParadoxEngine.lang = ParadoxEngine.lang==='en'?'id':'en'; SoundEngine.playClick();
+                PersistenceLocalStorageController.writeProgress(); SceneOverlayManager.applyLocalization();
+            });
+
+            document.getElementById('btn-save-name').addEventListener('click', () => {
+                let val = document.getElementById('player-name-input').value.trim();
+                if(val.length > 0) {
+                    ParadoxEngine.player.name = val; SoundEngine.playClick();
+                    PersistenceLocalStorageController.writeProgress();
+                    alert("Identity registered securely inside database arrays.");
+                }
+            });
+
+            document.getElementById('btn-lobby-prestart').addEventListener('click', () => { SoundEngine.init(); SoundEngine.playClick(); SceneOverlayManager.transitionToScene('PreStart'); });
+            document.getElementById('btn-lobby-shop').addEventListener('click', () => { SoundEngine.init(); SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Shop'); });
+            document.getElementById('btn-lobby-config').addEventListener('click', () => { SoundEngine.init(); SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Config'); });
+            document.getElementById('btn-shop-back').addEventListener('click', () => { SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Lobby'); });
+            document.getElementById('btn-prestart-back').addEventListener('click', () => { SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Lobby'); });
+            
+            document.getElementById('btn-prestart-launch').addEventListener('click', () => {
+                SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Gameplay');
+            });
+
+            document.getElementById('btn-claim-daily').addEventListener('click', () => {
+                let today = new Date().toDateString();
+                if (ParadoxEngine.player.lastDailyClaimDate === today) {
+                    alert("Daily logistics allocations already drained for today.");
+                } else {
+                    ParadoxEngine.player.coins += 2500;
+                    ParadoxEngine.player.lastDailyClaimDate = today;
+                    PersistenceLocalStorageController.writeProgress();
+                    SoundEngine.playVictory(); alert("Acquired +2500 Quantum Logistic Chips!");
+                }
+            });
+
+            document.getElementById('btn-config-back').addEventListener('click', () => {
+                SoundEngine.playClick();
+                ParadoxEngine.music = document.getElementById('cfg-check-music').checked;
+                ParadoxEngine.sfx = document.getElementById('cfg-check-sfx').checked;
+                if(ParadoxEngine.music) SoundEngine.startAmbientDrone(); else SoundEngine.stopAmbientDrone();
+                PersistenceLocalStorageController.writeProgress(); SceneOverlayManager.transitionToScene('Lobby');
+            });
+
+            document.getElementById('btn-config-reset').addEventListener('click', () => {
+                if(confirm("Confirm recursive wipe of structural matrix progress files?")) {
+                    localStorage.clear(); window.location.reload();
+                }
+            });
+
+            document.getElementById('btn-go-retry').addEventListener('click', () => { SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Gameplay'); });
+            document.getElementById('btn-go-menu').addEventListener('click', () => { SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Lobby'); });
+            document.getElementById('btn-vic-continue').addEventListener('click', () => { SoundEngine.playClick(); SceneOverlayManager.transitionToScene('Gameplay'); });
+
+            // Catalog Interactive Filter Tabs Attachments Interface Loop
+            const tabs = document.querySelectorAll('#shop-tab-container .tab-btn');
+            tabs.forEach(t => {
+                t.addEventListener('click', (e) => {
+                    tabs.forEach(x => x.classList.remove('active')); e.target.classList.add('active');
+                    ShopUserInterface.activeFilter = e.target.getAttribute('data-filter'); ShopUserInterface.renderGrid();
+                });
+            });
+
+            // Map Selection Event Allocation Mapping Loop
+            const mCards = document.querySelectorAll('.map-card');
+            mCards.forEach(mc => {
+                mc.addEventListener('click', (e) => {
+                    mCards.forEach(c => c.classList.remove('selected'));
+                    let targetCard = e.target.closest('.map-card');
+                    targetCard.classList.add('selected');
+                    ParadoxEngine.selectedMapTheme = targetCard.getAttribute('data-map');
+                    SoundEngine.playClick();
+                });
+            });
+
+            window.addEventListener('keydown', (e) => {
+                if(ParadoxEngine.scene !== 'Gameplay') return;
+                if(e.code === 'ArrowUp' || e.code === 'KeyW') GameCoreEnvironment.executeMove(0, -1);
+                else if(e.code === 'ArrowDown' || e.code === 'KeyS') GameCoreEnvironment.executeMove(0, 1);
+                else if(e.code === 'ArrowLeft' || e.code === 'KeyA') GameCoreEnvironment.executeMove(-1, 0);
+                else if(e.code === 'ArrowRight' || e.code === 'KeyD') GameCoreEnvironment.executeMove(1, 0);
+                else if(e.code === 'Space') GameCoreEnvironment.triggerActiveSpellExecution(); // SPACE key uses selected spell
+            });
+
+            // Mobile Joystick Controllers Touch Event Assembly Maps
+            const jsZone = document.getElementById('joystick-zone');
+            const jsHandle = document.getElementById('joystick-handle');
+            if('ontouchstart' in window || window.matchMedia("(max-width:1024px)").matches) jsZone.style.display='flex';
+
+            let jsActive = false; let jsX = 0; let jsY = 0;
+            jsZone.addEventListener('touchstart', () => {
+                jsActive = true; SoundEngine.init();
+                let b = jsZone.getBoundingClientRect(); jsX = b.left + b.width/2; jsY = b.top + b.height/2;
+            });
+            jsZone.addEventListener('touchmove', (e) => {
+                if(!jsActive) return; e.preventDefault(); let t = e.touches[0];
+                let dx = t.clientX - jsX; let dy = t.clientY - jsY; let d = Math.hypot(dx, dy);
+                if(d > 40) { dx = (dx/d)*40; dy = (dy/d)*40; }
+                jsHandle.style.transform = `translate(${dx}px,${dy}px)`;
+                if(d > 20) {
+                    if(Math.abs(dx) > Math.abs(dy)) { if(dx>0) GameCoreEnvironment.executeMove(1,0); else GameCoreEnvironment.executeMove(-1,0); }
+                    else { if(dy>0) GameCoreEnvironment.executeMove(0,1); else GameCoreEnvironment.executeMove(0,-1); }
+                }
+            });
+            const resetJs = () => { jsActive = false; jsHandle.style.transform = 'translate(0px,0px)'; };
+            jsZone.addEventListener('touchend', resetJs); jsZone.addEventListener('touchcancel', resetJs);
+        });
+    </script>
+</body>
+</html>
